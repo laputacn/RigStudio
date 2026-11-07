@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import ts from 'typescript';
+import {translate,normalizeLanguage} from '../shared/i18n.mjs';
+import {setNativeLanguage,t} from '../desktop/i18n.mjs';
+const root=new URL('../',import.meta.url),english=JSON.parse(fs.readFileSync(new URL('shared/locales/en.json',root),'utf8'));
+const placeholders=value=>[...new Set([...value.matchAll(/\{(\w+)\}/g)].map(m=>m[1]))].sort();
+test('English defaults and locale normalization do not depend on OS locale',()=>{assert.equal(normalizeLanguage(undefined),'en');assert.equal(normalizeLanguage('fr'),'en');assert.equal(normalizeLanguage('zh-CN'),'zh-CN');assert.equal(translate('en','动作原型'),'Animation reference');assert.equal(translate('zh-CN','动作原型'),'动作原型');});
+test('Translation catalog has complete placeholders and preserves unknown content',()=>{for(const[key,value]of Object.entries(english)){assert.ok(value.trim(),key);assert.deepEqual(placeholders(value),placeholders(key),key);}assert.equal(translate('en','{p0} 个关节',{p0:12}),'12 joints');assert.equal(translate('en','用户创建的模型名称'),'用户创建的模型名称');});
+test('Every literal UI translation is available in English',()=>{const missing=new Set();for(const folder of ['src','desktop'])for(const file of fs.readdirSync(new URL(folder+'/',root))){if(!/\.(tsx?|mjs)$/.test(file))continue;const source=fs.readFileSync(new URL(folder+'/'+file,root),'utf8'),sf=ts.createSourceFile(file,source,99,true,file.endsWith('tsx')?ts.ScriptKind.TSX:ts.ScriptKind.TS);function visit(n){if(ts.isCallExpression(n)&&n.expression.getText(sf)==='t'&&ts.isStringLiteral(n.arguments[0])&&!Object.hasOwn(english,n.arguments[0].text))missing.add(n.arguments[0].text);ts.forEachChild(n,visit);}visit(sf);}assert.deepEqual([...missing],[]);});
+test('Native dialog language switches without changing unknown file names',()=>{setNativeLanguage('zh-CN');assert.equal(t('选择本机 Blender'),'选择本机 Blender');setNativeLanguage('en');assert.equal(t('选择本机 Blender'),'Select Blender on this computer');assert.equal(t('我的模型.glb'),'我的模型.glb');});

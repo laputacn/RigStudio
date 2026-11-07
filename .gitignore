@@ -147,3 +147,19 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Local workspaces and build/QA outputs
+release/
+artifacts/
+workspace/
+workspaces/
+model-settings.json
+settings.json
+*.blend
+*.blend1
+*.glb
+!tests/fixtures/character.glb
+*.zip
+*.exe
+*.dmg
+.DS_Store

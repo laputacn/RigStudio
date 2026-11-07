@@ -1,0 +1,95 @@
+{
+  "name": "rig-studio",
+  "version": "0.3.1",
+  "private": true,
+  "description": "Local Blender character rigging and animation comparison desktop workspace",
+  "author": "Rig Studio",
+  "license": "MIT",
+  "type": "module",
+  "main": "desktop/main.mjs",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "vite --host 127.0.0.1",
+    "build": "node scripts/third-party-notices.mjs && tsc --noEmit && vite build",
+    "start": "electron .",
+    "test": "node --test tests/*.test.mjs",
+    "pack": "npm run build && electron-builder --dir",
+    "dist:win": "npm run build && electron-builder --win nsis --x64",
+    "dist:mac": "npm run build && electron-builder --mac dmg --arm64 --x64",
+    "dist:win:portable": "npm run build && electron-builder --win zip --x64 -c.win.signAndEditExecutable=false",
+    "dist:mac:portable": "npm run build && electron-builder --mac zip --arm64 --x64",
+    "test:ui": "node tests/language.e2e.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@types/three": "^0.183.0",
+    "@xyflow/react": "^12.12.1",
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0",
+    "lucide-react": "^0.468.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "three": "0.187.0",
+    "typescript": "^5.9.3",
+    "vite": "8.3.6"
+  },
+  "build": {
+    "appId": "com.rigstudio.desktop",
+    "productName": "Rig Studio",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "desktop/**/*",
+      "package.json",
+      "shared/**/*",
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md",
+      "THIRD_PARTY_LICENSES.txt"
+    ],
+    "extraResources": [
+      {
+        "from": "blender",
+        "to": "blender",
+        "filter": [
+          "**/*.py"
+        ]
+      }
+    ],
+    "asar": true,
+    "npmRebuild": false,
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "Rig-Studio-${version}-Windows-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.graphics-design",
+      "artifactName": "Rig-Studio-${version}-macOS-${arch}.${ext}"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/laputacn/RigStudio.git"
+  },
+  "homepage": "https://github.com/laputacn/RigStudio#readme",
+  "bugs": {
+    "url": "https://github.com/laputacn/RigStudio/issues"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
